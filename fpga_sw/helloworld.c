@@ -48,10 +48,11 @@
 #include <stdio.h>
 #include "platform.h"
 #include "xil_printf.h"
+#include "xil_types.h"
 
 u32 *CONFIG = XPAR_APB_M_0_BASEADDR ;
-u8 *INMEM  = XPAR_APB_M2_0_BASEADDR;
-u8  *OUTMEM = XPAR_APB_M3_0_BASEADDR;
+u32 *INMEM  = XPAR_APB_M2_0_BASEADDR;
+u32  *OUTMEM = XPAR_APB_M3_0_BASEADDR;
 
 
 
@@ -63,6 +64,10 @@ int main()
 
 	int data0,data1,data2,data3;
 	int OutData1;
+	s16 RoutData;
+	s16 IoutData;
+	s16 RextData;
+	s16 IextData;
     init_platform();
 
 
@@ -70,7 +75,7 @@ int main()
 #include "Indata.c"
 #include "Outdata.c"
 
-    CONFIG[3] = sizeof(Indata);
+    CONFIG[3] = sizeof(Indata)/4;
 
     for (int i = 0; i<sizeof(Indata);i++){
      	INMEM[i] = Indata[i];
@@ -82,9 +87,14 @@ int main()
     CONFIG[0] = 1;
 
 	xil_printf("input\tExpect\tGot\n\r");
-   for (int i=0;i<sizeof(Outdata);i++){
+   for (int i=0;i<sizeof(Outdata)/4;i++){
     	OutData1 = OUTMEM[i];
-    	if (OutData1 == Outdata[i]){
+    	RoutData = OutData1;
+    	IoutData = OutData1 >> 16;
+    	RextData = Outdata[i];
+    	IextData = Outdata[i] >> 16;
+//    	if (OutData1 == Outdata[i]){
+        if (abs(RoutData-RextData) <10 & abs(IoutData-IextData) < 10){
     		xil_printf("%x\t%x ==\t%x OK\n\r",Indata[i],Outdata[i],OutData1);
     	} else {
     		xil_printf("%x\t%x <>\t%x ===> worng\n\r",Indata[i],Outdata[i],OutData1);

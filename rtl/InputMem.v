@@ -37,11 +37,11 @@ input   Send_start,
 input  [11:0] Send_Length,
 output  Valid,
 
-output [7:0] M_AXIS_tdata , 
-output       M_AXIS_tvalid, 
-output       M_AXIS_tkeep, 
-output       M_AXIS_tlast, 
-input        M_AXIS_tready
+output [31:0] M_AXIS_tdata , 
+output        M_AXIS_tvalid, 
+//output [3:0]  M_AXIS_tkeep, 
+output        M_AXIS_tlast, 
+input         M_AXIS_tready
 
     );
 
@@ -69,7 +69,8 @@ reg [31:0] RegMem;
 always @(posedge S_APB_aclk)
     if (S_APB_penable && S_APB_psel && S_APB_pwrite && (S_APB_paddr[31:12] == 20'h43c00))Mem[S_APB_paddr[11:2]] <=  S_APB_pwdata;
 always @(posedge S_APB_aclk)
-    RegMem <= Mem[RaddCounter[11:2]];
+    RegMem <= Mem[RaddCounter];
+//    RegMem <= Mem[RaddCounter[11:2]];
 
 reg Reg_ready;
 always @(posedge S_APB_aclk or negedge S_APB_aresetn)
@@ -91,12 +92,13 @@ always @(posedge S_APB_aclk or negedge S_APB_aresetn)
     if (!S_APB_aresetn) Sendadder <= 12'h000;
      else Sendadder <= RaddCounter;
      
-assign M_AXIS_tdata  = (Sendadder[1:0] == 2'b00) ? RegMem[ 7: 0]  : 
-                       (Sendadder[1:0] == 2'b01) ? RegMem[15: 8]  : 
-                       (Sendadder[1:0] == 2'b10) ? RegMem[23:16]  : 
-                       (Sendadder[1:0] == 2'b11) ? RegMem[31:24]  : 8'h00;
+assign M_AXIS_tdata  =  (Reg_Valid) ? RegMem : 32'h00000000;
+//                       (Sendadder[1:0] == 2'b00) ? RegMem[ 7: 0]  : 
+//                       (Sendadder[1:0] == 2'b01) ? RegMem[15: 8]  : 
+//                       (Sendadder[1:0] == 2'b10) ? RegMem[23:16]  : 
+//                       (Sendadder[1:0] == 2'b11) ? RegMem[31:24]  : 8'h00;
 assign M_AXIS_tvalid =  Reg_Valid;
-assign M_AXIS_tkeep  =  Reg_Valid;
+//assign M_AXIS_tkeep  =  {4{Reg_Valid}};
 assign M_AXIS_tlast  =  (RaddCounter == Send_Length) ? 1'b1 :1'b0;
 
 assign  Valid = M_AXIS_tvalid;

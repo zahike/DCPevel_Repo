@@ -53,11 +53,11 @@ reg         OS_APB_pwrite   ; //input         S_APB_pwrite  ,
 reg   Send_start       ; // input   Send_start       ,
 reg  [11:0] Send_Length; // input  [11:0] Send_Length,
 
-wire [7:0] M_AXIS_tdata ; // output [7:0] M_AXIS_tdata ,  
-wire       M_AXIS_tvalid; // output       M_AXIS_tvalid,  
-wire       M_AXIS_tkeep ; // output       M_AXIS_tkeep ,  
-wire       M_AXIS_tlast ; // output       M_AXIS_tlast ,  
-wire       M_AXIS_tready; // input        M_AXIS_tready
+wire [31:0] M_AXIS_tdata ; // output [7:0] M_AXIS_tdata ,  
+wire        M_AXIS_tvalid; // output       M_AXIS_tvalid,  
+wire [3:0]  M_AXIS_tkeep ; // output       M_AXIS_tkeep ,  
+wire        M_AXIS_tlast ; // output       M_AXIS_tlast ,  
+wire        M_AXIS_tready; // input        M_AXIS_tready
 
 integer i;
 
@@ -76,9 +76,9 @@ IS_APB_pwrite  = 0; //input         S_APB_pwrite  ,
 for (i=0;i<20;i=i+1) begin
     Add_i = i;
     Data_i = i;
-    IWriteAPB({16'h43c1,Add_i,2'b00},{Data_i,2'b11,Data_i,2'b10,Data_i,2'b01,Data_i,2'b00});
+    IWriteAPB({16'h43c0,Add_i,2'b00},{Data_i,2'b11,Data_i,2'b10,Data_i,2'b01,Data_i,2'b00});
 end  
-Send_Length = 79; // input  [11:0] Send_Length,
+Send_Length = 20; // input  [11:0] Send_Length,
 #100;
 @(posedge clk);
 Send_start = 1'b1;

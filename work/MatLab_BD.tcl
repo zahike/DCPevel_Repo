@@ -40,7 +40,7 @@ if { [string first $scripts_vivado_version $current_vivado_version] == -1 } {
 
 # The design that will be created by this Tcl script contains the following 
 # module references:
-# InputMem, MATLAB_DUT, MATLAB_conf, OutputMem
+# InputMem, MATLAB_conf, OutputMem
 
 # Please add the sources of those modules before sourcing this Tcl script.
 
@@ -132,7 +132,9 @@ xilinx.com:ip:axi_apb_bridge:3.0\
 xilinx.com:ip:ila:6.2\
 xilinx.com:ip:processing_system7:5.5\
 xilinx.com:ip:proc_sys_reset:5.0\
+xilinx.com:ip:xfft:9.1\
 xilinx.com:ip:xlconcat:2.1\
+xilinx.com:ip:xlconstant:1.1\
 xilinx.com:ip:xlslice:1.0\
 "
 
@@ -160,7 +162,6 @@ set bCheckModules 1
 if { $bCheckModules == 1 } {
    set list_check_mods "\ 
 InputMem\
-MATLAB_DUT\
 MATLAB_conf\
 OutputMem\
 "
@@ -249,17 +250,10 @@ proc create_root_design { parentCell } {
      return 1
    }
   
-  # Create instance: MATLAB_DUT_0, and set properties
-  set block_name MATLAB_DUT
-  set block_cell_name MATLAB_DUT_0
-  if { [catch {set MATLAB_DUT_0 [create_bd_cell -type module -reference $block_name $block_cell_name] } errmsg] } {
-     catch {common::send_gid_msg -ssname BD::TCL -id 2095 -severity "ERROR" "Unable to add referenced block <$block_name>. Please add the files for ${block_name}'s definition into the project."}
-     return 1
-   } elseif { $MATLAB_DUT_0 eq "" } {
-     catch {common::send_gid_msg -ssname BD::TCL -id 2096 -severity "ERROR" "Unable to referenced block <$block_name>. Please add the files for ${block_name}'s definition into the project."}
-     return 1
-   }
-  
+  set_property -dict [ list \
+   CONFIG.CLK_DOMAIN {MatLab_BD_processing_system7_0_0_FCLK_CLK0} \
+ ] [get_bd_intf_pins /InputMem_0/M_AXIS]
+
   # Create instance: MATLAB_conf_0, and set properties
   set block_name MATLAB_conf
   set block_cell_name MATLAB_conf_0
@@ -328,9 +322,10 @@ proc create_root_design { parentCell } {
   set_property -dict [ list \
    CONFIG.C_ENABLE_ILA_AXI_MON {false} \
    CONFIG.C_MONITOR_TYPE {Native} \
-   CONFIG.C_NUM_OF_PROBES {10} \
-   CONFIG.C_PROBE0_WIDTH {8} \
-   CONFIG.C_PROBE5_WIDTH {8} \
+   CONFIG.C_NUM_OF_PROBES {7} \
+   CONFIG.C_PROBE0_WIDTH {32} \
+   CONFIG.C_PROBE4_WIDTH {32} \
+   CONFIG.C_PROBE5_WIDTH {1} \
  ] $ila_2
 
   # Create instance: processing_system7_0, and set properties
@@ -369,11 +364,13 @@ proc create_root_design { parentCell } {
    CONFIG.PCW_APU_PERIPHERAL_FREQMHZ {650} \
    CONFIG.PCW_ARMPLL_CTRL_FBDIV {26} \
    CONFIG.PCW_CAN0_BASEADDR {0xE0008000} \
+   CONFIG.PCW_CAN0_GRP_CLK_ENABLE {0} \
    CONFIG.PCW_CAN0_HIGHADDR {0xE0008FFF} \
    CONFIG.PCW_CAN0_PERIPHERAL_CLKSRC {External} \
    CONFIG.PCW_CAN0_PERIPHERAL_ENABLE {0} \
    CONFIG.PCW_CAN0_PERIPHERAL_FREQMHZ {-1} \
    CONFIG.PCW_CAN1_BASEADDR {0xE0009000} \
+   CONFIG.PCW_CAN1_GRP_CLK_ENABLE {0} \
    CONFIG.PCW_CAN1_HIGHADDR {0xE0009FFF} \
    CONFIG.PCW_CAN1_PERIPHERAL_CLKSRC {External} \
    CONFIG.PCW_CAN1_PERIPHERAL_ENABLE {0} \
@@ -544,10 +541,12 @@ proc create_root_design { parentCell } {
    CONFIG.PCW_GPIO_MIO_GPIO_IO {MIO} \
    CONFIG.PCW_GPIO_PERIPHERAL_ENABLE {0} \
    CONFIG.PCW_I2C0_BASEADDR {0xE0004000} \
+   CONFIG.PCW_I2C0_GRP_INT_ENABLE {0} \
    CONFIG.PCW_I2C0_HIGHADDR {0xE0004FFF} \
    CONFIG.PCW_I2C0_PERIPHERAL_ENABLE {0} \
    CONFIG.PCW_I2C0_RESET_ENABLE {0} \
    CONFIG.PCW_I2C1_BASEADDR {0xE0005000} \
+   CONFIG.PCW_I2C1_GRP_INT_ENABLE {0} \
    CONFIG.PCW_I2C1_HIGHADDR {0xE0005FFF} \
    CONFIG.PCW_I2C1_PERIPHERAL_ENABLE {0} \
    CONFIG.PCW_I2C1_RESET_ENABLE {0} \
@@ -961,6 +960,11 @@ gpio[0]#qspi0_ss_b#qspi0_io[0]#qspi0_io[1]#qspi0_io[2]#qspi0_io[3]/HOLD_B#qspi0_
    CONFIG.PCW_TPIU_PERIPHERAL_FREQMHZ {200} \
    CONFIG.PCW_TRACE_BUFFER_CLOCK_DELAY {12} \
    CONFIG.PCW_TRACE_BUFFER_FIFO_SIZE {128} \
+   CONFIG.PCW_TRACE_GRP_16BIT_ENABLE {0} \
+   CONFIG.PCW_TRACE_GRP_2BIT_ENABLE {0} \
+   CONFIG.PCW_TRACE_GRP_32BIT_ENABLE {0} \
+   CONFIG.PCW_TRACE_GRP_4BIT_ENABLE {0} \
+   CONFIG.PCW_TRACE_GRP_8BIT_ENABLE {0} \
    CONFIG.PCW_TRACE_INTERNAL_WIDTH {2} \
    CONFIG.PCW_TRACE_PERIPHERAL_ENABLE {0} \
    CONFIG.PCW_TRACE_PIPELINE_WIDTH {8} \
@@ -1138,6 +1142,16 @@ gpio[0]#qspi0_ss_b#qspi0_io[0]#qspi0_io[1]#qspi0_io[2]#qspi0_io[3]/HOLD_B#qspi0_
   # Create instance: rst_ps7_0_100M, and set properties
   set rst_ps7_0_100M [ create_bd_cell -type ip -vlnv xilinx.com:ip:proc_sys_reset:5.0 rst_ps7_0_100M ]
 
+  # Create instance: xfft_0, and set properties
+  set xfft_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:xfft:9.1 xfft_0 ]
+  set_property -dict [ list \
+   CONFIG.implementation_options {automatically_select} \
+   CONFIG.number_of_stages_using_block_ram_for_data_and_phase_factors {0} \
+   CONFIG.output_ordering {natural_order} \
+   CONFIG.target_clock_frequency {100} \
+   CONFIG.transform_length {16} \
+ ] $xfft_0
+
   # Create instance: xlconcat_0, and set properties
   set xlconcat_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:xlconcat:2.1 xlconcat_0 ]
   set_property -dict [ list \
@@ -1149,6 +1163,20 @@ gpio[0]#qspi0_ss_b#qspi0_io[0]#qspi0_io[1]#qspi0_io[2]#qspi0_io[3]/HOLD_B#qspi0_
   set_property -dict [ list \
    CONFIG.NUM_PORTS {3} \
  ] $xlconcat_1
+
+  # Create instance: xlconstant_0, and set properties
+  set xlconstant_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:xlconstant:1.1 xlconstant_0 ]
+  set_property -dict [ list \
+   CONFIG.CONST_VAL {0} \
+   CONFIG.CONST_WIDTH {8} \
+ ] $xlconstant_0
+
+  # Create instance: xlconstant_1, and set properties
+  set xlconstant_1 [ create_bd_cell -type ip -vlnv xilinx.com:ip:xlconstant:1.1 xlconstant_1 ]
+  set_property -dict [ list \
+   CONFIG.CONST_VAL {0} \
+   CONFIG.CONST_WIDTH {1} \
+ ] $xlconstant_1
 
   # Create instance: xlslice_0, and set properties
   set xlslice_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:xlslice:1.0 xlslice_0 ]
@@ -1186,21 +1214,19 @@ gpio[0]#qspi0_ss_b#qspi0_io[0]#qspi0_io[1]#qspi0_io[2]#qspi0_io[3]/HOLD_B#qspi0_
   connect_bd_intf_net -intf_net ps7_0_axi_periph_M00_AXI [get_bd_intf_pins axi_apb_bridge_0/AXI4_LITE] [get_bd_intf_pins ps7_0_axi_periph/M00_AXI]
 
   # Create port connections
-  connect_bd_net -net InputMem_0_M_AXIS_tdata [get_bd_pins InputMem_0/M_AXIS_tdata] [get_bd_pins MATLAB_DUT_0/S_AXIS_tdata] [get_bd_pins ila_2/probe0]
-  connect_bd_net -net InputMem_0_M_AXIS_tkeep [get_bd_pins InputMem_0/M_AXIS_tkeep] [get_bd_pins MATLAB_DUT_0/S_AXIS_tkeep] [get_bd_pins ila_2/probe1]
-  connect_bd_net -net InputMem_0_M_AXIS_tlast [get_bd_pins InputMem_0/M_AXIS_tlast] [get_bd_pins MATLAB_DUT_0/S_AXIS_tlast] [get_bd_pins ila_2/probe2]
-  connect_bd_net -net InputMem_0_M_AXIS_tvalid [get_bd_pins InputMem_0/M_AXIS_tvalid] [get_bd_pins MATLAB_DUT_0/S_AXIS_tvalid] [get_bd_pins ila_2/probe3]
+  connect_bd_net -net InputMem_0_M_AXIS_tdata [get_bd_pins InputMem_0/M_AXIS_tdata] [get_bd_pins ila_2/probe0] [get_bd_pins xfft_0/s_axis_data_tdata]
+  connect_bd_net -net InputMem_0_M_AXIS_tlast [get_bd_pins InputMem_0/M_AXIS_tlast] [get_bd_pins ila_2/probe1] [get_bd_pins xfft_0/s_axis_data_tlast]
+  connect_bd_net -net InputMem_0_M_AXIS_tvalid [get_bd_pins InputMem_0/M_AXIS_tvalid] [get_bd_pins ila_2/probe3] [get_bd_pins xfft_0/s_axis_data_tvalid]
   connect_bd_net -net InputMem_0_S_APB_prdata [get_bd_pins InputMem_0/S_APB_prdata] [get_bd_pins axi_apb_bridge_0/m_apb_prdata2] [get_bd_pins ila_0/probe8]
   connect_bd_net -net InputMem_0_S_APB_pready [get_bd_pins InputMem_0/S_APB_pready] [get_bd_pins xlconcat_0/In1]
   connect_bd_net -net InputMem_0_S_APB_pslverr [get_bd_pins InputMem_0/S_APB_pslverr] [get_bd_pins xlconcat_1/In1]
   connect_bd_net -net InputMem_0_Valid [get_bd_pins InputMem_0/Valid] [get_bd_pins MATLAB_conf_0/Valid] [get_bd_pins ila_1/probe5]
-  connect_bd_net -net MATLAB_DUT_0_M_AXIS_tdata [get_bd_pins MATLAB_DUT_0/M_AXIS_tdata] [get_bd_pins OutputMem_0/S_AXIS_tdata] [get_bd_pins ila_2/probe5]
-  connect_bd_net -net MATLAB_DUT_0_M_AXIS_tkeep [get_bd_pins MATLAB_DUT_0/M_AXIS_tkeep] [get_bd_pins OutputMem_0/S_AXIS_tkeep] [get_bd_pins ila_2/probe6]
-  connect_bd_net -net MATLAB_DUT_0_M_AXIS_tlast [get_bd_pins MATLAB_DUT_0/M_AXIS_tlast] [get_bd_pins OutputMem_0/S_AXIS_tlast] [get_bd_pins ila_2/probe7]
-  connect_bd_net -net MATLAB_DUT_0_M_AXIS_tvalid [get_bd_pins MATLAB_DUT_0/M_AXIS_tvalid] [get_bd_pins OutputMem_0/S_AXIS_tvalid] [get_bd_pins ila_2/probe8]
-  connect_bd_net -net MATLAB_DUT_0_S_AXIS_tready [get_bd_pins InputMem_0/M_AXIS_tready] [get_bd_pins MATLAB_DUT_0/S_AXIS_tready] [get_bd_pins ila_2/probe4]
+  connect_bd_net -net MATLAB_DUT_0_M_AXIS_tdata [get_bd_pins OutputMem_0/S_AXIS_tdata] [get_bd_pins ila_2/probe4] [get_bd_pins xfft_0/m_axis_data_tdata]
+  connect_bd_net -net MATLAB_DUT_0_M_AXIS_tlast [get_bd_pins OutputMem_0/S_AXIS_tlast] [get_bd_pins ila_2/probe6] [get_bd_pins xfft_0/m_axis_data_tlast]
+  connect_bd_net -net MATLAB_DUT_0_M_AXIS_tvalid [get_bd_pins OutputMem_0/S_AXIS_tvalid] [get_bd_pins ila_2/probe5] [get_bd_pins xfft_0/m_axis_data_tvalid]
+  connect_bd_net -net MATLAB_DUT_0_S_AXIS_tready [get_bd_pins InputMem_0/M_AXIS_tready] [get_bd_pins ila_2/probe2] [get_bd_pins xfft_0/s_axis_data_tready]
   connect_bd_net -net MATLAB_conf_0_MATLABLength [get_bd_pins InputMem_0/Send_Length] [get_bd_pins MATLAB_conf_0/MATLABLength] [get_bd_pins ila_0/probe12] [get_bd_pins ila_1/probe11]
-  connect_bd_net -net MATLAB_conf_0_MATLABconf [get_bd_pins MATLAB_DUT_0/MATLABconf] [get_bd_pins MATLAB_conf_0/MATLABconf] [get_bd_pins ila_0/probe11] [get_bd_pins ila_1/probe10]
+  connect_bd_net -net MATLAB_conf_0_MATLABconf [get_bd_pins MATLAB_conf_0/MATLABconf] [get_bd_pins ila_0/probe11] [get_bd_pins ila_1/probe10]
   connect_bd_net -net MATLAB_conf_0_S_APB_prdata [get_bd_pins MATLAB_conf_0/S_APB_prdata] [get_bd_pins axi_apb_bridge_0/m_apb_prdata] [get_bd_pins ila_0/probe2] [get_bd_pins ila_1/probe6]
   connect_bd_net -net MATLAB_conf_0_S_APB_pready [get_bd_pins MATLAB_conf_0/S_APB_pready] [get_bd_pins ila_1/probe7] [get_bd_pins xlconcat_0/In0]
   connect_bd_net -net MATLAB_conf_0_S_APB_pslverr [get_bd_pins MATLAB_conf_0/S_APB_pslverr] [get_bd_pins ila_1/probe8] [get_bd_pins xlconcat_1/In0]
@@ -1208,18 +1234,20 @@ gpio[0]#qspi0_ss_b#qspi0_io[0]#qspi0_io[1]#qspi0_io[2]#qspi0_io[3]/HOLD_B#qspi0_
   connect_bd_net -net OutputMem_0_S_APB_prdata [get_bd_pins OutputMem_0/S_APB_prdata] [get_bd_pins axi_apb_bridge_0/m_apb_prdata3] [get_bd_pins ila_0/probe9]
   connect_bd_net -net OutputMem_0_S_APB_pready [get_bd_pins OutputMem_0/S_APB_pready] [get_bd_pins xlconcat_0/In2]
   connect_bd_net -net OutputMem_0_S_APB_pslverr [get_bd_pins OutputMem_0/S_APB_pslverr] [get_bd_pins xlconcat_1/In2]
-  connect_bd_net -net OutputMem_0_S_AXIS_tready [get_bd_pins MATLAB_DUT_0/M_AXIS_tready] [get_bd_pins OutputMem_0/S_AXIS_tready] [get_bd_pins ila_2/probe9]
+  connect_bd_net -net OutputMem_0_S_AXIS_tready [get_bd_pins OutputMem_0/S_AXIS_tready] [get_bd_pins xfft_0/m_axis_data_tready]
   connect_bd_net -net axi_apb_bridge_0_m_apb_paddr [get_bd_pins InputMem_0/S_APB_paddr] [get_bd_pins MATLAB_conf_0/S_APB_paddr] [get_bd_pins OutputMem_0/S_APB_paddr] [get_bd_pins axi_apb_bridge_0/m_apb_paddr] [get_bd_pins ila_0/probe0] [get_bd_pins ila_1/probe0]
   connect_bd_net -net axi_apb_bridge_0_m_apb_penable [get_bd_pins InputMem_0/S_APB_penable] [get_bd_pins MATLAB_conf_0/S_APB_penable] [get_bd_pins OutputMem_0/S_APB_penable] [get_bd_pins axi_apb_bridge_0/m_apb_penable] [get_bd_pins ila_0/probe1] [get_bd_pins ila_1/probe1]
   connect_bd_net -net axi_apb_bridge_0_m_apb_psel [get_bd_pins axi_apb_bridge_0/m_apb_psel] [get_bd_pins ila_0/probe4] [get_bd_pins xlslice_0/Din] [get_bd_pins xlslice_1/Din] [get_bd_pins xlslice_2/Din]
   connect_bd_net -net axi_apb_bridge_0_m_apb_pwdata [get_bd_pins InputMem_0/S_APB_pwdata] [get_bd_pins MATLAB_conf_0/S_APB_pwdata] [get_bd_pins OutputMem_0/S_APB_pwdata] [get_bd_pins axi_apb_bridge_0/m_apb_pwdata] [get_bd_pins ila_0/probe6] [get_bd_pins ila_1/probe3]
   connect_bd_net -net axi_apb_bridge_0_m_apb_pwrite [get_bd_pins InputMem_0/S_APB_pwrite] [get_bd_pins MATLAB_conf_0/S_APB_pwrite] [get_bd_pins OutputMem_0/S_APB_pwrite] [get_bd_pins axi_apb_bridge_0/m_apb_pwrite] [get_bd_pins ila_0/probe7] [get_bd_pins ila_1/probe4]
-  connect_bd_net -net processing_system7_0_FCLK_CLK0 [get_bd_pins InputMem_0/S_APB_aclk] [get_bd_pins MATLAB_DUT_0/S_APB_aclk] [get_bd_pins MATLAB_conf_0/S_APB_aclk] [get_bd_pins OutputMem_0/S_APB_aclk] [get_bd_pins axi_apb_bridge_0/s_axi_aclk] [get_bd_pins ila_0/clk] [get_bd_pins ila_1/clk] [get_bd_pins ila_2/clk] [get_bd_pins processing_system7_0/FCLK_CLK0] [get_bd_pins processing_system7_0/M_AXI_GP0_ACLK] [get_bd_pins ps7_0_axi_periph/ACLK] [get_bd_pins ps7_0_axi_periph/M00_ACLK] [get_bd_pins ps7_0_axi_periph/S00_ACLK] [get_bd_pins rst_ps7_0_100M/slowest_sync_clk]
+  connect_bd_net -net processing_system7_0_FCLK_CLK0 [get_bd_pins InputMem_0/S_APB_aclk] [get_bd_pins MATLAB_conf_0/S_APB_aclk] [get_bd_pins OutputMem_0/S_APB_aclk] [get_bd_pins axi_apb_bridge_0/s_axi_aclk] [get_bd_pins ila_0/clk] [get_bd_pins ila_1/clk] [get_bd_pins ila_2/clk] [get_bd_pins processing_system7_0/FCLK_CLK0] [get_bd_pins processing_system7_0/M_AXI_GP0_ACLK] [get_bd_pins ps7_0_axi_periph/ACLK] [get_bd_pins ps7_0_axi_periph/M00_ACLK] [get_bd_pins ps7_0_axi_periph/S00_ACLK] [get_bd_pins rst_ps7_0_100M/slowest_sync_clk] [get_bd_pins xfft_0/aclk]
   connect_bd_net -net processing_system7_0_FCLK_RESET0_N [get_bd_pins processing_system7_0/FCLK_RESET0_N] [get_bd_pins rst_ps7_0_100M/ext_reset_in]
   connect_bd_net -net rst_ps7_0_100M_interconnect_aresetn [get_bd_pins ps7_0_axi_periph/ARESETN] [get_bd_pins rst_ps7_0_100M/interconnect_aresetn]
-  connect_bd_net -net rst_ps7_0_100M_peripheral_aresetn [get_bd_pins InputMem_0/S_APB_aresetn] [get_bd_pins MATLAB_DUT_0/S_APB_aresetn] [get_bd_pins MATLAB_conf_0/S_APB_aresetn] [get_bd_pins OutputMem_0/S_APB_aresetn] [get_bd_pins axi_apb_bridge_0/s_axi_aresetn] [get_bd_pins ps7_0_axi_periph/M00_ARESETN] [get_bd_pins ps7_0_axi_periph/S00_ARESETN] [get_bd_pins rst_ps7_0_100M/peripheral_aresetn]
+  connect_bd_net -net rst_ps7_0_100M_peripheral_aresetn [get_bd_pins InputMem_0/S_APB_aresetn] [get_bd_pins MATLAB_conf_0/S_APB_aresetn] [get_bd_pins OutputMem_0/S_APB_aresetn] [get_bd_pins axi_apb_bridge_0/s_axi_aresetn] [get_bd_pins ps7_0_axi_periph/M00_ARESETN] [get_bd_pins ps7_0_axi_periph/S00_ARESETN] [get_bd_pins rst_ps7_0_100M/peripheral_aresetn]
   connect_bd_net -net xlconcat_0_dout [get_bd_pins axi_apb_bridge_0/m_apb_pready] [get_bd_pins ila_0/probe3] [get_bd_pins xlconcat_0/dout]
   connect_bd_net -net xlconcat_1_dout [get_bd_pins axi_apb_bridge_0/m_apb_pslverr] [get_bd_pins ila_0/probe5] [get_bd_pins xlconcat_1/dout]
+  connect_bd_net -net xlconstant_0_dout [get_bd_pins xfft_0/s_axis_config_tdata] [get_bd_pins xlconstant_0/dout]
+  connect_bd_net -net xlconstant_1_dout [get_bd_pins xfft_0/s_axis_config_tvalid] [get_bd_pins xlconstant_1/dout]
   connect_bd_net -net xlslice_0_Dout [get_bd_pins MATLAB_conf_0/S_APB_psel] [get_bd_pins xlslice_0/Dout]
   connect_bd_net -net xlslice_1_Dout [get_bd_pins InputMem_0/S_APB_psel] [get_bd_pins ila_1/probe2] [get_bd_pins xlslice_1/Dout]
   connect_bd_net -net xlslice_2_Dout [get_bd_pins OutputMem_0/S_APB_psel] [get_bd_pins xlslice_2/Dout]

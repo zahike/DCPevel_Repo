@@ -28,10 +28,10 @@ input signed [15:0] INai,
 input signed [15:0] INbr,
 input signed [15:0] INbi,
               
-input signed [16:0] OUTsumr,
-input signed [16:0] OUTsumi,
-input signed [16:0] OUTsubr,
-input signed [16:0] OUTsubi
+output signed [16:0] OUTsumr,
+output signed [16:0] OUTsumi,
+output signed [16:0] OUTsubr,
+output signed [16:0] OUTsubi
     );
 assign OUTsumr = INar + INbr;
 assign OUTsumi = INai + INbi;

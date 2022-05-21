@@ -53,7 +53,7 @@ assign coafiR[1] = 16'h0000;
 assign coafiR[2] = 16'hC000;
 assign coafiR[3] = 16'h0000;
 assign coafiI[0] = 16'h0000;
-assign coafiI[1] = 16'hc000;
+assign coafiI[1] = 16'hC000;
 assign coafiI[2] = 16'h0000;
 assign coafiI[3] = 16'h4000;
 

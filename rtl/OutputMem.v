@@ -35,7 +35,7 @@ input         S_APB_pwrite  ,
 
 input [31:0]  S_AXIS_tdata , 
 input         S_AXIS_tvalid, 
-//input [3:0]   S_AXIS_tkeep, 
+input [3:0]   S_AXIS_tkeep, 
 input         S_AXIS_tlast, 
 output        S_AXIS_tready
 
@@ -46,16 +46,6 @@ always @(posedge S_APB_aclk or negedge S_APB_aresetn)
     if (!S_APB_aresetn) S_AXIS_counter <= 12'h000;
      else if (!S_AXIS_tvalid) S_AXIS_counter <= 12'h000;
      else S_AXIS_counter <= S_AXIS_counter + 1;
-//reg [7:0] DataIn [0:2];
-//always @(posedge S_APB_aclk or negedge S_APB_aresetn)
-//    if (!S_APB_aresetn) DataIn[0] <= 8'h00;
-//     else if (S_AXIS_tvalid && (S_AXIS_counter[1:0] == 2'b00)) DataIn[0] <= S_AXIS_tdata; 
-//always @(posedge S_APB_aclk or negedge S_APB_aresetn)
-//    if (!S_APB_aresetn) DataIn[1] <= 8'h00;
-//     else if (S_AXIS_tvalid && (S_AXIS_counter[1:0] == 2'b01)) DataIn[1] <= S_AXIS_tdata; 
-//always @(posedge S_APB_aclk or negedge S_APB_aresetn)
-//    if (!S_APB_aresetn) DataIn[2] <= 8'h00;
-//     else if (S_AXIS_tvalid && (S_AXIS_counter[1:0] == 2'b10)) DataIn[2] <= S_AXIS_tdata; 
     
 reg [31:0] Mem [0:1023];
 reg [31:0] RegMem;

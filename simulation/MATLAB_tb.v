@@ -59,10 +59,36 @@ wire [3:0]  M_AXIS_tkeep ; // output       M_AXIS_tkeep ,
 wire        M_AXIS_tlast ; // output       M_AXIS_tlast ,  
 wire        M_AXIS_tready; // input        M_AXIS_tready
 
+wire [31:0] S_AXIS_tdata ; // output [7:0] M_AXIS_tdata ,  
+wire        S_AXIS_tvalid; // output       M_AXIS_tvalid,  
+wire [3:0]  S_AXIS_tkeep ; // output       M_AXIS_tkeep ,  
+wire        S_AXIS_tlast ; // output       M_AXIS_tlast ,  
+wire        S_AXIS_tready; // input        M_AXIS_tready
+
 integer i;
 
 reg [13:0] Add_i;
 reg [5:0] Data_i;
+
+wire [15:0] InData [0:15];
+
+assign InData[0 ] = 16'h0000;
+assign InData[1 ] = 16'h187D;
+assign InData[2 ] = 16'h2D40;
+assign InData[3 ] = 16'h3B1f;
+assign InData[4 ] = 16'h3fff;
+assign InData[5 ] = 16'h3B1f;
+assign InData[6 ] = 16'h2D40;
+assign InData[7 ] = 16'h187D;
+assign InData[8 ] = 16'h0000;
+assign InData[9 ] = 16'hE783;
+assign InData[10] = 16'hD2C0;
+assign InData[11] = 16'hC4E1;
+assign InData[12] = 16'hC001;
+assign InData[13] = 16'hC4E1;
+assign InData[14] = 16'hD2C0;
+assign InData[15] = 16'hE783;
+
 
 initial begin
 Send_start  = 0; // input   Send_start       ,
@@ -73,12 +99,17 @@ IS_APB_psel    = 0; //input  [0:0]  S_APB_psel    ,
 IS_APB_pwdata  = 0; //input  [31:0] S_APB_pwdata  ,
 IS_APB_pwrite  = 0; //input         S_APB_pwrite  ,
 @(posedge rstn);
-for (i=0;i<20;i=i+1) begin
+#100;
+@(posedge clk);
+Send_Length = 16; // input  [11:0] Send_Length,
+#100;
+@(posedge clk);
+for (i=0;i<16;i=i+1) begin
     Add_i = i;
     Data_i = i;
-    IWriteAPB({16'h43c0,Add_i,2'b00},{Data_i,2'b11,Data_i,2'b10,Data_i,2'b01,Data_i,2'b00});
+//    IWriteAPB({16'h43c0,Add_i,2'b00},{Data_i,2'b11,Data_i,2'b10,Data_i,2'b01,Data_i,2'b00});
+    IWriteAPB({16'h43c0,Add_i,2'b00},{16'h0000,InData[i]});
 end  
-Send_Length = 20; // input  [11:0] Send_Length,
 #100;
 @(posedge clk);
 Send_start = 1'b1;
@@ -115,7 +146,7 @@ InputMem InputMem_inst(                 // module InputMem(
                           // 
 .M_AXIS_tdata (M_AXIS_tdata ),      // output [7:0] M_AXIS_tdata , 
 .M_AXIS_tvalid(M_AXIS_tvalid),      // output       M_AXIS_tvalid, 
-.M_AXIS_tkeep (M_AXIS_tkeep ),       // output       M_AXIS_tkeep, 
+//.M_AXIS_tkeep (M_AXIS_tkeep ),       // output       M_AXIS_tkeep, 
 .M_AXIS_tlast (M_AXIS_tlast ),       // output       M_AXIS_tlast, 
 .M_AXIS_tready(M_AXIS_tready)       // input        M_AXIS_tready
     );
@@ -133,12 +164,32 @@ OutputMem OutputMem_inst(                 // module InputMem(
 .S_APB_pwdata  (OS_APB_pwdata  ),    // input  [31:0] S_APB_pwdata  ,
 .S_APB_pwrite  (OS_APB_pwrite  ),    // input         S_APB_pwrite  ,
                           
-.S_AXIS_tdata (M_AXIS_tdata ),      // output [7:0] M_AXIS_tdata , 
-.S_AXIS_tvalid(M_AXIS_tvalid),      // output       M_AXIS_tvalid, 
-.S_AXIS_tkeep (M_AXIS_tkeep ),       // output       M_AXIS_tkeep, 
-.S_AXIS_tlast (M_AXIS_tlast ),       // output       M_AXIS_tlast, 
-.S_AXIS_tready(M_AXIS_tready)       // input        M_AXIS_tready
+.S_AXIS_tdata (S_AXIS_tdata ),      // output [7:0] M_AXIS_tdata , 
+.S_AXIS_tvalid(S_AXIS_tvalid),      // output       M_AXIS_tvalid, 
+//.S_AXIS_tkeep (S_AXIS_tkeep ),       // output       M_AXIS_tkeep, 
+.S_AXIS_tlast (S_AXIS_tlast ),       // output       M_AXIS_tlast, 
+.S_AXIS_tready(S_AXIS_tready)       // input        M_AXIS_tready
     );
+
+DUT_wreap DUT_wreap_inst(
+.clk   (clk ),
+.rstn  (rstn),
+
+.Select (2'b0),
+
+.S_AXIS_tdata (M_AXIS_tdata ), 
+.S_AXIS_tvalid(M_AXIS_tvalid), 
+.S_AXIS_tlast (M_AXIS_tlast ), 
+.S_AXIS_tready(M_AXIS_tready),
+      
+.M_AXIS_tdata (S_AXIS_tdata ), 
+.M_AXIS_tvalid(S_AXIS_tvalid), 
+.M_AXIS_tlast (S_AXIS_tlast ), 
+.M_AXIS_tready(S_AXIS_tready)
+    );
+
+
+
 
 task IWriteAPB;
 input [31:0] Adder;

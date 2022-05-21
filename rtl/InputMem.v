@@ -39,7 +39,7 @@ output  Valid,
 
 output [31:0] M_AXIS_tdata , 
 output        M_AXIS_tvalid, 
-//output [3:0]  M_AXIS_tkeep, 
+output [3:0]  M_AXIS_tkeep, 
 output        M_AXIS_tlast, 
 input         M_AXIS_tready
 
@@ -99,7 +99,7 @@ assign M_AXIS_tdata  =  (Reg_Valid) ? RegMem : 32'h00000000;
 //                       (Sendadder[1:0] == 2'b11) ? RegMem[31:24]  : 8'h00;
 assign M_AXIS_tvalid =  Reg_Valid;
 //assign M_AXIS_tkeep  =  {4{Reg_Valid}};
-assign M_AXIS_tlast  =  (RaddCounter == Send_Length) ? 1'b1 :1'b0;
+assign M_AXIS_tlast  =  (Reg_Valid && (RaddCounter == Send_Length)) ? 1'b1 :1'b0;
 
 assign  Valid = M_AXIS_tvalid;
 

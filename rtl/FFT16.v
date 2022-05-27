@@ -22,6 +22,7 @@
 
 module FFT16(
 input   clk,
+input   rstn,
 input   [31:0] Vin0 ,
 input   [31:0] Vin1 ,
 input   [31:0] Vin2 ,
@@ -114,6 +115,8 @@ assign coafiI[15] = 16'h187D;
 
 wire signed [18:0] FFT2outR[0:15];
 wire signed [18:0] FFT2outI[0:15];
+reg signed [18:0] DelFFT2outR[0:15];
+reg signed [18:0] DelFFT2outI[0:15];
 wire signed [35:0] MulloutR[0:15];
 wire signed [35:0] MulloutI[0:15];
 wire signed [18:0] TempR[0:15];
@@ -147,6 +150,13 @@ generate
             .Vout7({FFT2outI[8*i+7],FFT2outR[8*i+7]})
         );
         for (j=0;j<8;j=j+1)begin
+            always@(posedge clk or negedge rstn)
+                if (!rstn) DelFFT2outR[8*i+j] <= 19'h00000;
+                 else DelFFT2outR[8*i+j] <= FFT2outR[j];
+            always@(posedge clk or negedge rstn)
+                if (!rstn) DelFFT2outI[8*i+j] <= 19'h00000;
+                 else DelFFT2outI[8*i+j] <= FFT2outI[j];        
+        
             ComplexMull 
             #(
                 .AWIDTH(16),  // size of 1st input of multiplier
@@ -163,8 +173,10 @@ generate
             );    
             assign TempR[8*i+j] = MulloutR[8*i+j][32:14];
             assign TempI[8*i+j] = MulloutI[8*i+j][32:14];
-            assign SumR [8*i+j] = TempR[8*i+j]+FFT2outR[j];
-            assign SumI [8*i+j] = TempI[8*i+j]+FFT2outI[j];
+//            assign SumR [8*i+j] = TempR[8*i+j]+FFT2outR[j];
+//            assign SumI [8*i+j] = TempI[8*i+j]+FFT2outI[j];
+            assign SumR [8*i+j] = TempR[8*i+j]+DelFFT2outR[8*i+j];
+            assign SumI [8*i+j] = TempI[8*i+j]+DelFFT2outI[8*i+j];
         end 
     end 
 endgenerate

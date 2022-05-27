@@ -36,7 +36,7 @@ wire [19:0] FFToutI[0:15];
 
 FFT16 FFT16_inst(
 .clk(clk),
-//.rstn(rstn)  ,
+.rstn(rstn)  ,
 
 .Vin0  (32'h00000000),
 .Vin1  (32'h0000187D),

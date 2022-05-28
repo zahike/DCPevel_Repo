@@ -86,7 +86,7 @@ int main()
 //    CONFIG[2] = 3;	// switch every 1 bits
     CONFIG[0] = 1;
 
-	xil_printf("input\tExpect\tGot\n\r");
+	xil_printf("input\tReal\tExpect\tGot\tImage\tExpect\tGot\n\r\n\r");
    for (int i=0;i<sizeof(Outdata)/4;i++){
     	OutData1 = OUTMEM[i];
     	RoutData = OutData1;
@@ -95,9 +95,9 @@ int main()
     	IextData = Outdata[i] >> 16;
 //    	if (OutData1 == Outdata[i]){
         if (abs(RoutData-RextData) <10 & abs(IoutData-IextData) < 10){
-    		xil_printf("%x\t%x ==\t%x OK\n\r",Indata[i],Outdata[i],OutData1);
+    		xil_printf("%d\tReal:\t%d == %d\t\tImage: %d == %d \t\t OK\n\r",Indata[i],RextData,RoutData,IextData,IoutData);
     	} else {
-    		xil_printf("%x\t%x <>\t%x ===> worng\n\r",Indata[i],Outdata[i],OutData1);
+    		xil_printf("%d\tReal:\t%d <> %d\t\tImage: %d <> %d \t\t ===> worng\n\r",Indata[i],RextData,RoutData,IextData,IoutData);
     	}
     }
 

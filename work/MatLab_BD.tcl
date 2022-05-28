@@ -51,6 +51,7 @@ if { [string first $scripts_vivado_version $current_vivado_version] == -1 } {
 set list_projs [get_projects -quiet]
 if { $list_projs eq "" } {
    create_project project_1 myproj -part xc7z020clg400-1
+   set_property BOARD_PART digilentinc.com:arty-z7-20:part0:1.0 [current_project]
 }
 
 
@@ -502,6 +503,14 @@ proc create_root_design { parentCell } {
    CONFIG.PCW_FPGA_FCLK1_ENABLE {0} \
    CONFIG.PCW_FPGA_FCLK2_ENABLE {0} \
    CONFIG.PCW_FPGA_FCLK3_ENABLE {0} \
+   CONFIG.PCW_FTM_CTI_IN0 {<Select>} \
+   CONFIG.PCW_FTM_CTI_IN1 {<Select>} \
+   CONFIG.PCW_FTM_CTI_IN2 {<Select>} \
+   CONFIG.PCW_FTM_CTI_IN3 {<Select>} \
+   CONFIG.PCW_FTM_CTI_OUT0 {<Select>} \
+   CONFIG.PCW_FTM_CTI_OUT1 {<Select>} \
+   CONFIG.PCW_FTM_CTI_OUT2 {<Select>} \
+   CONFIG.PCW_FTM_CTI_OUT3 {<Select>} \
    CONFIG.PCW_GP0_EN_MODIFIABLE_TXN {1} \
    CONFIG.PCW_GP0_NUM_READ_THREADS {4} \
    CONFIG.PCW_GP0_NUM_WRITE_THREADS {4} \
@@ -1212,6 +1221,7 @@ gpio[0]#qspi0_ss_b#qspi0_io[0]#qspi0_io[1]#qspi0_io[2]#qspi0_io[3]/HOLD_B#qspi0_
   # Restore current instance
   current_bd_instance $oldCurInst
 
+  validate_bd_design
   save_bd_design
 }
 # End of create_root_design()
@@ -1223,6 +1233,4 @@ gpio[0]#qspi0_ss_b#qspi0_io[0]#qspi0_io[1]#qspi0_io[2]#qspi0_io[3]/HOLD_B#qspi0_
 
 create_root_design ""
 
-
-common::send_gid_msg -ssname BD::TCL -id 2053 -severity "WARNING" "This Tcl script was generated from a block design that has not been validated. It is possible that design <$design_name> may result in errors during validation."
 

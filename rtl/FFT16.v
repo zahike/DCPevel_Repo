@@ -20,7 +20,7 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 
-module FFT16(
+(* keep_hierarchy = "yes" *)module FFT16(
 input   clk,
 input   rstn,
 input   [31:0] Vin0 ,
@@ -40,22 +40,22 @@ input   [31:0] Vin13 ,
 input   [31:0] Vin14 ,
 input   [31:0] Vin15 ,
 
-output [39:0] Vout0 , 
-output [39:0] Vout1 , 
-output [39:0] Vout2 , 
-output [39:0] Vout3 , 
-output [39:0] Vout4 , 
-output [39:0] Vout5 , 
-output [39:0] Vout6 , 
-output [39:0] Vout7 , 
-output [39:0] Vout8 , 
-output [39:0] Vout9 , 
-output [39:0] Vout10 ,
-output [39:0] Vout11 ,
-output [39:0] Vout12 ,
-output [39:0] Vout13 ,
-output [39:0] Vout14 ,
-output [39:0] Vout15 
+output [31:0] Vout0 , 
+output [31:0] Vout1 , 
+output [31:0] Vout2 , 
+output [31:0] Vout3 , 
+output [31:0] Vout4 , 
+output [31:0] Vout5 , 
+output [31:0] Vout6 , 
+output [31:0] Vout7 , 
+output [31:0] Vout8 , 
+output [31:0] Vout9 , 
+output [31:0] Vout10 ,
+output [31:0] Vout11 ,
+output [31:0] Vout12 ,
+output [31:0] Vout13 ,
+output [31:0] Vout14 ,
+output [31:0] Vout15 
     );
 wire signed [31:0] Vin [0:15];    
     
@@ -79,58 +79,69 @@ wire signed [31:0] Vin [0:15];
 wire signed [15:0] coafiR[0:15];
 wire signed [15:0] coafiI[0:15];
 
-assign coafiR[0]  = 16'h4000;
-assign coafiR[1]  = 16'h3B20;
-assign coafiR[2]  = 16'h2D41;
+assign coafiR[0]  = 16'h3FFF;
+assign coafiR[1]  = 16'h3B1F;
+assign coafiR[2]  = 16'h2D40;
 assign coafiR[3]  = 16'h187D;
 assign coafiR[4]  = 16'h0000;
 assign coafiR[5]  = 16'hE783;
-assign coafiR[6]  = 16'hD2BF;
-assign coafiR[7]  = 16'hC4E0;
-assign coafiR[8]  = 16'hC000;
-assign coafiR[9]  = 16'hC4E0;
-assign coafiR[10] = 16'hD2BF;
+assign coafiR[6]  = 16'hD2C0;
+assign coafiR[7]  = 16'hC4E1;
+assign coafiR[8]  = 16'hC001;
+assign coafiR[9]  = 16'hC4E1;
+assign coafiR[10] = 16'hD2C0;
 assign coafiR[11] = 16'hE783;
 assign coafiR[12] = 16'h0000;
 assign coafiR[13] = 16'h187D;
-assign coafiR[14] = 16'h2D41;
-assign coafiR[15] = 16'h3B20;
+assign coafiR[14] = 16'h2D40;
+assign coafiR[15] = 16'h3B1F;
 
 assign coafiI[0]  = 16'h0000;
 assign coafiI[1]  = 16'hE783;
-assign coafiI[2]  = 16'hD2BF;
-assign coafiI[3]  = 16'hC4E0;
-assign coafiI[4]  = 16'hC000;
-assign coafiI[5]  = 16'hC4E0;
-assign coafiI[6]  = 16'hD2BF;
+assign coafiI[2]  = 16'hD2C0;
+assign coafiI[3]  = 16'hC4E1;
+assign coafiI[4]  = 16'hC001;
+assign coafiI[5]  = 16'hC4E1;
+assign coafiI[6]  = 16'hD2C0;
 assign coafiI[7]  = 16'hE783;
 assign coafiI[8]  = 16'h0000;
 assign coafiI[9]  = 16'h187D;
-assign coafiI[10] = 16'h2D41;
-assign coafiI[11] = 16'h3B20;
-assign coafiI[12] = 16'h4000;
-assign coafiI[13] = 16'h3B20;
-assign coafiI[14] = 16'h2D41;
+assign coafiI[10] = 16'h2D40;
+assign coafiI[11] = 16'h3B1F;
+assign coafiI[12] = 16'h3FFF;
+assign coafiI[13] = 16'h3B1F;
+assign coafiI[14] = 16'h2D40;
 assign coafiI[15] = 16'h187D;
 
-wire signed [18:0] FFT2outR[0:15];
-wire signed [18:0] FFT2outI[0:15];
-reg signed [18:0] DelFFT2outR[0:15];
-reg signed [18:0] DelFFT2outI[0:15];
-wire signed [35:0] MulloutR[0:15];
-wire signed [35:0] MulloutI[0:15];
-wire signed [18:0] TempR[0:15];
-wire signed [18:0] TempI[0:15];
-wire signed [19:0] SumR[0:15];
-wire signed [19:0] SumI[0:15];
+wire signed [15:0] FFT2outR[0:15];
+wire signed [15:0] FFT2outI[0:15];
+//(* keep = "true" *) reg signed [15:0] DelFFT2outR[0:15];
+//(* keep = "true" *) reg signed [15:0] DelFFT2outI[0:15];
+wire signed [31:0] MulloutR[0:15];
+wire signed [31:0] MulloutI[0:15];
+wire signed [15:0] TempR[0:15];
+wire signed [15:0] TempI[0:15];
+wire signed [16:0] SumR[0:15];
+wire signed [16:0] SumI[0:15];
 
 genvar i,j;
+
+//generate 
+//    for (j=0;j<16;j=j+1) begin
+//        always@(posedge clk or negedge rstn)
+//            if (!rstn) DelFFT2outR[j] <= 19'h00000;
+//             else DelFFT2outR[j] <= FFT2outR[j];
+//        always@(posedge clk or negedge rstn)
+//            if (!rstn) DelFFT2outI[j] <= 19'h00000;
+//             else DelFFT2outI[j] <= FFT2outI[j];        
+//    end
+//endgenerate
 generate 
     for (i=0;i<2;i=i+1)begin
-     FFT8 FFT8_inst
+(* keep_hierarchy = "yes" *)     FFT8 FFT8_inst
         (
             .clk(clk),
-          
+            .rstn(rstn),
             .Vin0 (Vin[8*i+0]),
             .Vin1 (Vin[8*i+1]),
             .Vin2 (Vin[8*i+2]),
@@ -149,18 +160,11 @@ generate
             .Vout6({FFT2outI[8*i+6],FFT2outR[8*i+6]}),
             .Vout7({FFT2outI[8*i+7],FFT2outR[8*i+7]})
         );
-        for (j=0;j<8;j=j+1)begin
-            always@(posedge clk or negedge rstn)
-                if (!rstn) DelFFT2outR[8*i+j] <= 19'h00000;
-                 else DelFFT2outR[8*i+j] <= FFT2outR[j];
-            always@(posedge clk or negedge rstn)
-                if (!rstn) DelFFT2outI[8*i+j] <= 19'h00000;
-                 else DelFFT2outI[8*i+j] <= FFT2outI[j];        
-        
+        for (j=0;j<8;j=j+1)begin        
             ComplexMull 
             #(
                 .AWIDTH(16),  // size of 1st input of multiplier
-                .BWIDTH(19)  // size of 2nd input of multiplier
+                .BWIDTH(16)  // size of 2nd input of multiplier
             )ComplexMull_inst(
                 .clk(clk),               // Clock
                 .rstn(1'b1),
@@ -171,31 +175,35 @@ generate
                 .pr(MulloutR[8*i+j]),  // output signal
                 .pi(MulloutI[8*i+j])   // output signal    
             );    
-            assign TempR[8*i+j] = MulloutR[8*i+j][32:14];
-            assign TempI[8*i+j] = MulloutI[8*i+j][32:14];
-//            assign SumR [8*i+j] = TempR[8*i+j]+FFT2outR[j];
-//            assign SumI [8*i+j] = TempI[8*i+j]+FFT2outI[j];
-            assign SumR [8*i+j] = TempR[8*i+j]+DelFFT2outR[8*i+j];
-            assign SumI [8*i+j] = TempI[8*i+j]+DelFFT2outI[8*i+j];
+            assign TempR[8*i+j] = MulloutR[8*i+j][29:14];
+            assign TempI[8*i+j] = MulloutI[8*i+j][29:14];
+            assign SumR [8*i+j] = TempR[8*i+j]+FFT2outR[j];
+            assign SumI [8*i+j] = TempI[8*i+j]+FFT2outI[j];
+//        always@(posedge clk or negedge rstn)
+//            if (!rstn) SumR[8*i+j] <= 16'h0000;
+//             else SumR[8*i+j] <= TempR[8*i+j]+FFT2outR[j];
+//        always@(posedge clk or negedge rstn)
+//            if (!rstn) SumI[8*i+j] <= 16'h0000;
+//             else SumI[8*i+j] <= TempI[8*i+j]+FFT2outI[j];
         end 
     end 
 endgenerate
 
-assign Vout0  = {SumI[0 ],SumR[0 ]};
-assign Vout1  = {SumI[1 ],SumR[1 ]};
-assign Vout2  = {SumI[2 ],SumR[2 ]};
-assign Vout3  = {SumI[3 ],SumR[3 ]};
-assign Vout4  = {SumI[4 ],SumR[4 ]};
-assign Vout5  = {SumI[5 ],SumR[5 ]};
-assign Vout6  = {SumI[6 ],SumR[6 ]};
-assign Vout7  = {SumI[7 ],SumR[7 ]};
-assign Vout8  = {SumI[8 ],SumR[8 ]};
-assign Vout9  = {SumI[9 ],SumR[9 ]};
-assign Vout10 = {SumI[10],SumR[10]};
-assign Vout11 = {SumI[11],SumR[11]};
-assign Vout12 = {SumI[12],SumR[12]};
-assign Vout13 = {SumI[13],SumR[13]};
-assign Vout14 = {SumI[14],SumR[14]};
-assign Vout15 = {SumI[15],SumR[15]};
+assign Vout0  = {SumI[0 ][16:1],SumR[0 ][16:1]};
+assign Vout1  = {SumI[1 ][16:1],SumR[1 ][16:1]};
+assign Vout2  = {SumI[2 ][16:1],SumR[2 ][16:1]};
+assign Vout3  = {SumI[3 ][16:1],SumR[3 ][16:1]};
+assign Vout4  = {SumI[4 ][16:1],SumR[4 ][16:1]};
+assign Vout5  = {SumI[5 ][16:1],SumR[5 ][16:1]};
+assign Vout6  = {SumI[6 ][16:1],SumR[6 ][16:1]};
+assign Vout7  = {SumI[7 ][16:1],SumR[7 ][16:1]};
+assign Vout8  = {SumI[8 ][16:1],SumR[8 ][16:1]};
+assign Vout9  = {SumI[9 ][16:1],SumR[9 ][16:1]};
+assign Vout10 = {SumI[10][16:1],SumR[10][16:1]};
+assign Vout11 = {SumI[11][16:1],SumR[11][16:1]};
+assign Vout12 = {SumI[12][16:1],SumR[12][16:1]};
+assign Vout13 = {SumI[13][16:1],SumR[13][16:1]};
+assign Vout14 = {SumI[14][16:1],SumR[14][16:1]};
+assign Vout15 = {SumI[15][16:1],SumR[15][16:1]};
     
 endmodule

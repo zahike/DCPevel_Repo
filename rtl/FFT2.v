@@ -28,13 +28,19 @@ input signed [15:0] INai,
 input signed [15:0] INbr,
 input signed [15:0] INbi,
               
-output signed [16:0] OUTsumr,
-output signed [16:0] OUTsumi,
-output signed [16:0] OUTsubr,
-output signed [16:0] OUTsubi
+output signed [15:0] OUTsumr,
+output signed [15:0] OUTsumi,
+output signed [15:0] OUTsubr,
+output signed [15:0] OUTsubi
     );
-assign OUTsumr = INar + INbr;
-assign OUTsumi = INai + INbi;
-assign OUTsubr = INar - INbr;
-assign OUTsubi = INai - INbi;
+wire [16:0] Sumr = INar + INbr;
+wire [16:0] Sumi = INai + INbi;
+wire [16:0] Subr = INar - INbr;
+wire [16:0] Subi = INai - INbi;
+    
+assign OUTsumr = Sumr[16:1];
+assign OUTsumi = Sumi[16:1];
+assign OUTsubr = Subr[16:1];
+assign OUTsubi = Subi[16:1];
+
 endmodule

@@ -70,7 +70,6 @@ always @(posedge S_APB_aclk)
     if (S_APB_penable && S_APB_psel && S_APB_pwrite && (S_APB_paddr[31:12] == 20'h43c00))Mem[S_APB_paddr[11:2]] <=  S_APB_pwdata;
 always @(posedge S_APB_aclk)
     RegMem <= Mem[RaddCounter];
-//    RegMem <= Mem[RaddCounter[11:2]];
 
 reg Reg_ready;
 always @(posedge S_APB_aclk or negedge S_APB_aresetn)
@@ -93,12 +92,7 @@ always @(posedge S_APB_aclk or negedge S_APB_aresetn)
      else Sendadder <= RaddCounter;
      
 assign M_AXIS_tdata  =  (Reg_Valid) ? RegMem : 32'h00000000;
-//                       (Sendadder[1:0] == 2'b00) ? RegMem[ 7: 0]  : 
-//                       (Sendadder[1:0] == 2'b01) ? RegMem[15: 8]  : 
-//                       (Sendadder[1:0] == 2'b10) ? RegMem[23:16]  : 
-//                       (Sendadder[1:0] == 2'b11) ? RegMem[31:24]  : 8'h00;
 assign M_AXIS_tvalid =  Reg_Valid;
-//assign M_AXIS_tkeep  =  {4{Reg_Valid}};
 assign M_AXIS_tlast  =  (Reg_Valid && (RaddCounter == Send_Length)) ? 1'b1 :1'b0;
 
 assign  Valid = M_AXIS_tvalid;

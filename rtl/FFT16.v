@@ -115,27 +115,15 @@ assign coafiI[15] = 16'h187D;
 
 wire signed [15:0] FFT2outR[0:15];
 wire signed [15:0] FFT2outI[0:15];
-//(* keep = "true" *) reg signed [15:0] DelFFT2outR[0:15];
-//(* keep = "true" *) reg signed [15:0] DelFFT2outI[0:15];
 wire signed [31:0] MulloutR[0:15];
 wire signed [31:0] MulloutI[0:15];
 wire signed [15:0] TempR[0:15];
 wire signed [15:0] TempI[0:15];
-wire signed [16:0] SumR[0:15];
-wire signed [16:0] SumI[0:15];
+reg signed [16:0] SumR[0:15];
+reg signed [16:0] SumI[0:15];
 
 genvar i,j;
 
-//generate 
-//    for (j=0;j<16;j=j+1) begin
-//        always@(posedge clk or negedge rstn)
-//            if (!rstn) DelFFT2outR[j] <= 19'h00000;
-//             else DelFFT2outR[j] <= FFT2outR[j];
-//        always@(posedge clk or negedge rstn)
-//            if (!rstn) DelFFT2outI[j] <= 19'h00000;
-//             else DelFFT2outI[j] <= FFT2outI[j];        
-//    end
-//endgenerate
 generate 
     for (i=0;i<2;i=i+1)begin
 (* keep_hierarchy = "yes" *)     FFT8 FFT8_inst
@@ -177,14 +165,14 @@ generate
             );    
             assign TempR[8*i+j] = MulloutR[8*i+j][29:14];
             assign TempI[8*i+j] = MulloutI[8*i+j][29:14];
-            assign SumR [8*i+j] = TempR[8*i+j]+FFT2outR[j];
-            assign SumI [8*i+j] = TempI[8*i+j]+FFT2outI[j];
-//        always@(posedge clk or negedge rstn)
-//            if (!rstn) SumR[8*i+j] <= 16'h0000;
-//             else SumR[8*i+j] <= TempR[8*i+j]+FFT2outR[j];
-//        always@(posedge clk or negedge rstn)
-//            if (!rstn) SumI[8*i+j] <= 16'h0000;
-//             else SumI[8*i+j] <= TempI[8*i+j]+FFT2outI[j];
+            // assign SumR [8*i+j] = TempR[8*i+j]+FFT2outR[j];
+            // assign SumI [8*i+j] = TempI[8*i+j]+FFT2outI[j];
+       always@(posedge clk or negedge rstn)
+           if (!rstn) SumR[8*i+j] <= 16'h0000;
+            else SumR[8*i+j] <= TempR[8*i+j]+FFT2outR[j];
+       always@(posedge clk or negedge rstn)
+           if (!rstn) SumI[8*i+j] <= 16'h0000;
+            else SumI[8*i+j] <= TempI[8*i+j]+FFT2outI[j];
         end 
     end 
 endgenerate

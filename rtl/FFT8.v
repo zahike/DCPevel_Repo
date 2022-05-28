@@ -74,31 +74,18 @@ assign coafiI[5] = 16'h2D40;
 assign coafiI[6] = 16'h3FFF;
 assign coafiI[7] = 16'h2D40;
 
-//wire signed [35:0] FFT2out[0:7];
 wire signed [15:0] FFT2outR[0:7];
 wire signed [15:0] FFT2outI[0:7];
-//(* keep = "true" *) reg signed [15:0] DelFFT2outR[0:7];
-//(* keep = "true" *) reg signed [15:0] DelFFT2outI[0:7];
 wire signed [31:0] MulloutR[0:7];
 wire signed [31:0] MulloutI[0:7];
 wire signed [15:0] TempR[0:7];
 wire signed [15:0] TempI[0:7];
-wire signed [16:0] SumR[0:7];
-wire signed [16:0] SumI[0:7];
-//(* keep = "true" *)reg signed [16:0] SumR[0:7];
-//(* keep = "true" *)reg signed [16:0] SumI[0:7];
+// wire signed [16:0] SumR[0:7];
+// wire signed [16:0] SumI[0:7];
+reg signed [16:0] SumR[0:7];
+reg signed [16:0] SumI[0:7];
 
 genvar i,j;
-//generate 
-//    for (j=0;j<8;j=j+1) begin
-//        always@(posedge clk or negedge rstn)
-//            if (!rstn) DelFFT2outR[j] <= 16'h0000;
-//             else DelFFT2outR[j] <= FFT2outR[j];
-//        always@(posedge clk or negedge rstn)
-//            if (!rstn) DelFFT2outI[j] <= 16'h0000;
-//             else DelFFT2outI[j] <= FFT2outI[j];        
-//    end
-//endgenerate
 generate 
     for (i=0;i<2;i=i+1)begin
 (* keep_hierarchy = "yes" *)     FFT4 FFT4_inst
@@ -134,14 +121,14 @@ generate
             );    
             assign TempR[4*i+j] = MulloutR[4*i+j][29:14];
             assign TempI[4*i+j] = MulloutI[4*i+j][29:14];
-            assign SumR[4*i+j] = TempR[4*i+j]+FFT2outR[j];
-            assign SumI[4*i+j] = TempI[4*i+j]+FFT2outI[j];
-//        always@(posedge clk or negedge rstn)
-//            if (!rstn) SumR[4*i+j] <= 16'h0000;
-//             else SumR[4*i+j] <= TempR[4*i+j]+FFT2outR[j];
-//        always@(posedge clk or negedge rstn)
-//            if (!rstn) SumI[4*i+j] <= 16'h0000;
-//             else SumI[4*i+j] <= TempI[4*i+j]+FFT2outI[j];
+            // assign SumR[4*i+j] = TempR[4*i+j]+FFT2outR[j];
+            // assign SumI[4*i+j] = TempI[4*i+j]+FFT2outI[j];
+       always@(posedge clk or negedge rstn)
+           if (!rstn) SumR[4*i+j] <= 16'h0000;
+            else SumR[4*i+j] <= TempR[4*i+j]+FFT2outR[j];
+       always@(posedge clk or negedge rstn)
+           if (!rstn) SumI[4*i+j] <= 16'h0000;
+            else SumI[4*i+j] <= TempI[4*i+j]+FFT2outI[j];
         end 
     end 
 endgenerate
@@ -154,6 +141,5 @@ assign Vout4 = {SumI[4][16:1],SumR[4][16:1]};
 assign Vout5 = {SumI[5][16:1],SumR[5][16:1]};
 assign Vout6 = {SumI[6][16:1],SumR[6][16:1]};
 assign Vout7 = {SumI[7][16:1],SumR[7][16:1]};
-    
-    
+      
 endmodule

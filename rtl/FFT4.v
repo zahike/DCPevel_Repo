@@ -60,29 +60,15 @@ assign coafiI[3] = 16'h3FFF;
 
 wire signed [15:0] FFT2outR[0:3];
 wire signed [15:0] FFT2outI[0:3];
-//(* keep = "true" *) reg signed [15:0] DelFFT2outR[0:3];
-//(* keep = "true" *) reg signed [15:0] DelFFT2outI[0:3];
 wire signed [31:0] MulloutR[0:3];
 wire signed [31:0] MulloutI[0:3];
 wire signed [15:0] Mull17R[0:3];
 wire signed [15:0] Mull17I[0:3];
-//wire signed [16:0] SumR[0:3];
-//wire signed [16:0] SumI[0:3];
 (* keep = "true" *) reg signed [16:0] SumR[0:3];
 (* keep = "true" *) reg signed [16:0] SumI[0:3];
 
 
 genvar i,j;
-//generate 
-//    for (j=0;j<4;j=j+1) begin
-//        always@(posedge clk or negedge rstn)
-//            if (!rstn) DelFFT2outR[j] <= 16'h0000;
-//             else DelFFT2outR[j] <= FFT2outR[j];
-//        always@(posedge clk or negedge rstn)
-//            if (!rstn) DelFFT2outI[j] <= 16'h0000;
-//             else DelFFT2outI[j] <= FFT2outI[j];        
-//    end
-//endgenerate
 generate 
     for (i=0;i<2;i=i+1)begin
      FFT2 FFT2_inst
@@ -100,22 +86,6 @@ generate
             .OUTsubi(FFT2outI[2*i+1])
         );
         for (j=0;j<2;j=j+1)begin
-//            ComplexMull 
-//            #(
-//                .AWIDTH(16),  // size of 1st input of multiplier
-//                .BWIDTH(16)  // size of 2nd input of multiplier
-//            )ComplexMull_inst(
-//                .clk(clk),               // Clock
-//                .rstn(1'b1),
-//                .ar(coafiR[2*i+j]),  // 1st inputs real and imaginary parts
-//                .ai(coafiI[2*i+j]),  // 1st inputs real and imaginary parts
-//                .br(FFT2outR[2+j]),  // 2nd inputs real and imaginary parts
-//                .bi(FFT2outI[2+j]),  // 2nd inputs real and imaginary parts
-//                .pr(MulloutR[2*i+j]),  // output signal
-//                .pi(MulloutI[2*i+j])   // output signal    
-//            );    
-//            assign Mull17R[2*i+j] = MulloutR[2*i+j][29:14];
-//            assign Mull17I[2*i+j] = MulloutI[2*i+j][29:14];
               FFT4multi FFT4multi(
               .clk(clk) ,
               .Select(2*i+j),
@@ -125,9 +95,6 @@ generate
               .OUTar(Mull17R[2*i+j]),
               .OUTai(Mull17I[2*i+j])
                   );
-
-//            assign SumR[2*i+j] = Mull17R[2*i+j]+FFT2outR[j];
-//            assign SumI[2*i+j] = Mull17I[2*i+j]+FFT2outI[j];
         always@(posedge clk or negedge rstn)
             if (!rstn) SumR[2*i+j] <= 16'h0000;
              else SumR[2*i+j] <= Mull17R[2*i+j]+FFT2outR[j];
